@@ -3,6 +3,7 @@ pyrofork
 TgCrypto
 pyromod==1.5
 python-dotenv
+gunicorn
 # --- For-Database ------------ #
 pymongo
 motor
@@ -16,4 +17,5 @@ bs4
 shortzy
 aiohttp
 aiofiles
+
 asyncio
