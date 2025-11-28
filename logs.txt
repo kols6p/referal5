@@ -1,0 +1,40 @@
+[25-Nov-25 15:46:21 - INFO] - root - Stop signal received (SIGINT). Exiting...
+[25-Nov-25 15:46:21 - INFO] - bot - Bot stopped.
+[25-Nov-25 15:46:42 - INFO] - bot - Bot Running..!
+[25-Nov-25 15:52:13 - INFO] - root - Stop signal received (SIGINT). Exiting...
+[25-Nov-25 15:52:13 - INFO] - bot - Bot stopped.
+[25-Nov-25 15:58:17 - INFO] - bot - Bot Running..!
+[25-Nov-25 16:03:32 - ERROR] - pyrogram.dispatcher - 'ascii' codec can't decode byte 0xad in position 0: ordinal not in range(128)
+Traceback (most recent call last):
+  File "C:\Users\gupta\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\pyrogram\dispatcher.py", line 240, in handler_worker
+    await handler.callback(self.client, *args)
+  File "C:\Users\gupta\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\pyromod\listen\listen.py", line 93, in resolve_listener
+    await self.user_callback(client, message, *args)
+  File "C:\Users\gupta\OneDrive\Desktop\hhhhhh\fixrefer\v2\plugins\start.py", line 76, in start_command
+    _string = await decode(base64_string)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gupta\OneDrive\Desktop\hhhhhh\fixrefer\v2\helper_func.py", line 65, in decode
+    string = string_bytes.decode("ascii")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'ascii' codec can't decode byte 0xad in position 0: ordinal not in range(128)
+[25-Nov-25 16:04:10 - ERROR] - pyrogram.dispatcher - 'ascii' codec can't decode byte 0xad in position 0: ordinal not in range(128)
+Traceback (most recent call last):
+  File "C:\Users\gupta\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\pyrogram\dispatcher.py", line 240, in handler_worker
+    await handler.callback(self.client, *args)
+  File "C:\Users\gupta\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\LocalCache\local-packages\Python312\site-packages\pyromod\listen\listen.py", line 93, in resolve_listener
+    await self.user_callback(client, message, *args)
+  File "C:\Users\gupta\OneDrive\Desktop\hhhhhh\fixrefer\v2\plugins\start.py", line 76, in start_command
+    _string = await decode(base64_string)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\gupta\OneDrive\Desktop\hhhhhh\fixrefer\v2\helper_func.py", line 65, in decode
+    string = string_bytes.decode("ascii")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeDecodeError: 'ascii' codec can't decode byte 0xad in position 0: ordinal not in range(128)
+[25-Nov-25 16:18:28 - INFO] - root - Stop signal received (SIGINT). Exiting...
+[25-Nov-25 21:27:31 - INFO] - bot - Bot Running..!
+[25-Nov-25 21:33:10 - INFO] - root - Stop signal received (SIGINT). Exiting...
+[25-Nov-25 21:36:09 - INFO] - bot - Bot Running..!
+[25-Nov-25 21:46:45 - WARNING] - pyrogram.types.messages_and_media.message - Empty messages cannot be copied.
+[25-Nov-25 21:55:06 - INFO] - bot - Bot Running..!
+[25-Nov-25 21:59:18 - INFO] - bot - Bot Running..!
+[25-Nov-25 22:06:35 - INFO] - bot - Bot Running..!

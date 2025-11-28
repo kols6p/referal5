@@ -1,0 +1,254 @@
+import os
+import random
+import string
+from datetime import datetime, timedelta
+from pymongo import MongoClient
+import logging
+
+# Logger setup without emoji to avoid encoding issues
+logger = logging.getLogger(__name__)
+
+# MongoDB connection
+try:
+    from database import db
+    users = db.users
+    referrals = db.referrals
+    logger.info("MongoDB connected successfully for referral system")
+except Exception as e:
+    logger.error(f"MongoDB connection failed: {e}")
+    # Fallback connection
+    DB_URL = os.getenv("DB_URL", "mongodb+srv://db_user6:db_user6@cluster5.0vglyaj.mongodb.net/?appName=Cluster5")
+    DB_NAME = os.getenv("DB_NAME", "nodejs")
+    client = MongoClient(DB_URL)
+    db = client[DB_NAME]
+    users = db.users
+    referrals = db.referrals
+
+class ReferralSystem:
+    def __init__(self):
+        self.users = users
+        self.referrals = referrals
+    
+    def generate_referral_code(self):
+        """Unique referral code generate karega"""
+        while True:
+            code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            existing = self.users.find_one({"referral_code": code})
+            if not existing:
+                return code
+    
+    def get_or_create_referral_code(self, user_id):
+        """User ka referral code get/set karega"""
+        user = self.users.find_one({"user_id": user_id})
+        if user and user.get('referral_code'):
+            return user['referral_code']
+        
+        # Naya code generate karen
+        new_code = self.generate_referral_code()
+        self.users.update_one(
+            {"user_id": user_id},
+            {"$set": {"referral_code": new_code}},
+            upsert=True
+        )
+        return new_code
+    
+    async def process_referral(self, new_user_id, referral_code, username, bot):
+        """Referral process handle karega"""
+        try:
+            # Referrer dhundhen
+            referrer = self.users.find_one({"referral_code": referral_code})
+            
+            if not referrer:
+                logger.warning(f"Invalid referral code: {referral_code}")
+                return False
+            
+            if referrer['user_id'] == new_user_id:
+                logger.warning(f"Self-referral attempt: {new_user_id}")
+                return False
+            
+            # Check if already referred
+            existing_ref = self.referrals.find_one({
+                "referrer_id": referrer['user_id'],
+                "referred_id": new_user_id
+            })
+            if existing_ref:
+                logger.info(f"Already referred: {new_user_id} by {referrer['user_id']}")
+                return True
+            
+            # NEW USER CREATE/UPDATE
+            new_user = self.users.find_one({"user_id": new_user_id})
+            free_premium_expiry = datetime.now() + timedelta(days=1)
+            
+            if not new_user:
+                # New user create karen with all required fields
+                user_data = {
+                    "user_id": new_user_id,
+                    "username": username,
+                    "is_premium": False,
+                    "premium_expiry": None,
+                    "referral_code": self.generate_referral_code(),
+                    "referral_count": 0,
+                    "referred_by": referrer['user_id'],
+                    "free_premium_expiry": free_premium_expiry,
+                    "joined_at": datetime.now()
+                }
+                self.users.insert_one(user_data)
+            else:
+                # Existing user update karen
+                self.users.update_one(
+                    {"user_id": new_user_id},
+                    {
+                        "$set": {
+                            "referred_by": referrer['user_id'],
+                            "free_premium_expiry": free_premium_expiry
+                        }
+                    }
+                )
+            
+            # REFERRAL RECORD CREATE KAREN
+            referral_data = {
+                "referrer_id": referrer['user_id'],
+                "referred_id": new_user_id,
+                "referral_code": referral_code,
+                "status": "completed",
+                "created_at": datetime.now()
+            }
+            self.referrals.insert_one(referral_data)
+            
+            # REFERRER KA COUNT UPDATE
+            new_count = referrer.get('referral_count', 0) + 1
+            self.users.update_one(
+                {"user_id": referrer['user_id']},
+                {"$set": {"referral_count": new_count}}
+            )
+            
+            # REFERRER KO REWARD CHECK (har 5 referrals pe)
+            if new_count % 5 == 0:
+                reward_days = new_count // 5
+                reward_expiry = datetime.now() + timedelta(days=reward_days)
+                
+                # Check if referrer already has premium
+                referrer_current = self.users.find_one({"user_id": referrer['user_id']})
+                current_expiry = referrer_current.get('free_premium_expiry')
+                
+                if current_expiry and current_expiry > datetime.now():
+                    # Existing premium hai, extend karen
+                    new_expiry = current_expiry + timedelta(days=reward_days)
+                else:
+                    # Naya premium den
+                    new_expiry = reward_expiry
+                
+                self.users.update_one(
+                    {"user_id": referrer['user_id']},
+                    {"$set": {"free_premium_expiry": new_expiry}}
+                )
+            
+            # NOTIFICATIONS BHEJEN
+            await self.send_referral_notifications(referrer['user_id'], new_user_id, new_count, bot)
+            
+            logger.info(f"Referral processed: {new_user_id} referred by {referrer['user_id']}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Referral processing error: {e}")
+            return False
+    
+    async def send_referral_notifications(self, referrer_id, new_user_id, new_count, bot):
+        """Donon users ko notification bhejega"""
+        try:
+            # Referrer ko notification
+            await bot.send_message(
+                referrer_id,
+                f"**New Referral!**\n\n"
+                f"New user joined using your referral link!\n"
+                f"**Total referrals:** {new_count}\n"
+                f"**Next reward at:** {(new_count // 5 + 1) * 5} referrals\n\n"
+                f"Keep sharing your link!"
+            )
+            
+            # New user ko notification  
+            await bot.send_message(
+                new_user_id,
+                f"**Welcome! FREE PREMIUM ACTIVATED**\n\n"
+                f"**1 DAY FREE PREMIUM** activated!\n"
+                f"No token verification for 24 hours\n"
+                f"Direct file access enabled\n\n"
+                f"Use /refer to get your own referral link and share with friends!"
+            )
+            
+        except Exception as e:
+            logger.warning(f"Notification send failed: {e}")
+    
+    def get_referral_stats(self, user_id):
+        """User ka referral stats return karega"""
+        user = self.users.find_one({"user_id": user_id})
+        if not user:
+            return None
+        
+        referral_count = user.get('referral_count', 0)
+        referral_code = user.get('referral_code', 'Not generated')
+        
+        # Premium status check
+        has_premium = False
+        premium_till = None
+        
+        if user.get('free_premium_expiry') and user['free_premium_expiry'] > datetime.now():
+            has_premium = True
+            premium_till = user['free_premium_expiry']
+        elif user.get('is_premium') and user.get('premium_expiry') and user['premium_expiry'] > datetime.now():
+            has_premium = True
+            premium_till = user['premium_expiry']
+        
+        next_reward = 5 - (referral_count % 5)
+        
+        return {
+            'referral_count': referral_count,
+            'referral_code': referral_code,
+            'has_premium': has_premium,
+            'premium_till': premium_till,
+            'next_reward': next_reward
+        }
+    
+    def check_premium_access(self, user_id):
+        """Check kare user ko premium access hai ya nahi"""
+        user = self.users.find_one({"user_id": user_id})
+        if not user:
+            return False
+        
+        # Paid premium check
+        if user.get('is_premium') and user.get('premium_expiry'):
+            if user['premium_expiry'] > datetime.now():
+                return True
+            else:
+                # Premium expire ho gaya hai
+                self.users.update_one(
+                    {"user_id": user_id},
+                    {"$set": {"is_premium": False}}
+                )
+        
+        # Free premium from referrals check
+        if user.get('free_premium_expiry') and user['free_premium_expiry'] > datetime.now():
+            return True
+        
+        return False
+
+# Global instance
+referral_manager = ReferralSystem()
+
+# Utility functions for easy access
+async def handle_referral_start(new_user_id, referral_code, username, bot):
+    """Start command se call karenge"""
+    return await referral_manager.process_referral(new_user_id, referral_code, username, bot)
+
+def get_user_referral_stats(user_id):
+    """User stats ke liye"""
+    return referral_manager.get_referral_stats(user_id)
+
+def check_user_premium(user_id):
+    """Premium check ke liye"""
+    return referral_manager.check_premium_access(user_id)
+
+def get_referral_link(user_id, bot_username):
+    """Referral link generate karega"""
+    code = referral_manager.get_or_create_referral_code(user_id)
+    return f"https://t.me/{bot_username}?start=ref_{code}"

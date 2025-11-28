@@ -1,0 +1,96 @@
+from pyrogram import filters
+from referral_system import referral_manager, get_referral_link, get_user_referral_stats
+import os
+
+# Bot username (aapke main.py se le sakte hain)
+BOT_USERNAME = os.getenv("BOT_USERNAME", "your_bot_username")
+
+def register_referral_commands(app):
+    """Referral commands register karega"""
+    
+    @app.on_message(filters.command("refer"))
+    async def refer_command(client, message):
+        user_id = message.from_user.id
+        bot_username = (await client.get_me()).username
+        
+        referral_link = get_referral_link(user_id, bot_username)
+        stats = get_user_referral_stats(user_id)
+        
+        if not stats:
+            await message.reply_text("❌ Please use /start first to initialize your account.")
+            return
+        
+        text = f"""
+📢 **REFERRAL PROGRAM**
+
+🔗 **Your Referral Link:**
+`{referral_link}`
+
+🎁 **Referral Benefits:**
+• New users get **1 DAY FREE PREMIUM** 🎉
+• You get **1 day premium** for every **5 referrals** ⚡
+
+📊 **Your Statistics:**
+• **Total Referrals:** `{stats['referral_count']}`
+• **Next Reward:** `{stats['next_reward']}` more referrals
+• **Premium Status:** `{'✅ ACTIVE' if stats['has_premium'] else '❌ INACTIVE'}`
+
+🚀 **Share your link and start earning rewards!**
+        """
+        
+        await message.reply_text(text)
+    
+    @app.on_message(filters.command("mystats"))
+    async def mystats_command(client, message):
+        user_id = message.from_user.id
+        stats = get_user_referral_stats(user_id)
+        
+        if not stats:
+            await message.reply_text("❌ Please use /start first to initialize your account.")
+            return
+        
+        premium_info = ""
+        if stats['has_premium'] and stats['premium_till']:
+            from datetime import datetime
+            if stats['premium_till'] > datetime.now():
+                premium_info = f"⏰ **Premium Till:** `{stats['premium_till'].strftime('%Y-%m-%d %H:%M')}`"
+        
+        text = f"""
+📊 **YOUR STATISTICS**
+
+👥 **Total Referrals:** `{stats['referral_count']}`
+🎯 **Next Reward:** `{stats['next_reward']}` more referrals
+⭐ **Premium Status:** `{'✅ ACTIVE' if stats['has_premium'] else '❌ INACTIVE'}`
+{premium_info}
+🔗 **Your Code:** `{stats['referral_code']}`
+
+Use `/refer` to share your link and earn more rewards!
+        """
+        
+        await message.reply_text(text)
+    
+    @app.on_message(filters.command("referral_top"))
+    async def referral_top_command(client, message):
+        """Top referrers dikhayega"""
+        try:
+            # Top 10 referrers
+            top_referrers = referral_manager.users.find().sort("referral_count", -1).limit(10)
+            
+            text = "🏆 **TOP 10 REFERRERS**\n\n"
+            rank = 1
+            for user in top_referrers:
+                if user.get('referral_count', 0) > 0:
+                    username = user.get('username', 'Anonymous')
+                    count = user.get('referral_count', 0)
+                    text += f"{rank}. @{username} - `{count}` referrals\n"
+                    rank += 1
+            
+            if rank == 1:
+                text += "No referrals yet! Be the first to refer! 🚀"
+            
+            await message.reply_text(text)
+            
+        except Exception as e:
+            await message.reply_text("❌ Error fetching leaderboard.")
+    
+    print("✅ Referral commands registered successfully!")
