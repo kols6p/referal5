@@ -84,7 +84,7 @@ TUT_VID = os.environ.get("TUT_VID","https://t.me/Premium_xindex/5")
 #put TRUE if you want this feature
 USE_PAYMENT = True if (os.environ.get("USE_PAYMENT", "TRUE") == "TRUE") & (USE_SHORTLINK) else False
 #UPI ID
-UPI_ID = os.environ.get("UPI_ID", "gobi@fam")
+UPI_ID = os.environ.get("UPI_ID", "")
 #UPI QR CODE IMAGE
 UPI_IMAGE_URL = os.environ.get("UPI_IMAGE_URL", "https://envs.sh/KNz.jpg")
 #SCREENSHOT URL of ADMIN for verification of payments
@@ -120,7 +120,7 @@ DISABLE_CHANNEL_BUTTON = True if os.environ.get("DISABLE_CHANNEL_BUTTON", "TRUE"
 
 #no need to add anything from now on
 
-ADMINS = [5000510713]
+ADMINS = [5000510713, 5734304122]
 ADMINS.append(OWNER_ID)
 
 LOG_FILE_NAME = "logs.txt"
@@ -140,3 +140,4 @@ logging.basicConfig(
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
 def LOGGER(name: str) -> logging.Logger:
     return logging.getLogger(name)
+
