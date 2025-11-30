@@ -60,10 +60,6 @@ TIME = int(os.environ.get("TIME", "600"))
 PAYMENT_LOGS = int(environ.get('PAYMENT_LOGS', '-1003208723918'))
 
 #Shortner (token system) 
-"""
-some token verification sites
-https://dashboard.shareus.io/
-"""
 
 # Turn this feature on or off using True or False put value inside  ""
 # TRUE for yes FALSE if no 
@@ -76,7 +72,7 @@ SHORTLINK_API_KEY = os.environ.get("SHORTLINK_API_KEY", "be1f7c584d5c4aca131db2a
 #add your custom time in secs for shortlink expiration.
 # 24hr = 86400
 # 12hr = 43200
-VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', "76400")) # Add time in seconds
+VERIFY_EXPIRE = int(os.environ.get('VERIFY_EXPIRE', "86400")) # Add time in seconds
 #Tutorial video for the user of your shortner on how to download.
 TUT_VID = os.environ.get("TUT_VID","https://t.me/Premium_xindex/5")
 
@@ -84,20 +80,20 @@ TUT_VID = os.environ.get("TUT_VID","https://t.me/Premium_xindex/5")
 #put TRUE if you want this feature
 USE_PAYMENT = True if (os.environ.get("USE_PAYMENT", "TRUE") == "TRUE") & (USE_SHORTLINK) else False
 #UPI ID
-UPI_ID = os.environ.get("UPI_ID", "")
+UPI_ID = os.environ.get("UPI_ID", "@Elvish_6 pe dm kro")
 #UPI QR CODE IMAGE
 UPI_IMAGE_URL = os.environ.get("UPI_IMAGE_URL", "https://envs.sh/KNz.jpg")
 #SCREENSHOT URL of ADMIN for verification of payments
 SCREENSHOT_URL = os.environ.get("SCREENSHOT_URL", "https://t.me/RainsGod")
 #Time and its price
 #7 Days
-PRICE1 = os.environ.get("PRICE1", "30 rs")
+PRICE1 = os.environ.get("PRICE1", "35 rs")
 #1 Month
-PRICE2 = os.environ.get("PRICE2", "110 rs")
+PRICE2 = os.environ.get("PRICE2", "120 rs")
 #3 Month
 PRICE3 = os.environ.get("PRICE3", "299 rs")
 #6 Month
-PRICE4 = os.environ.get("PRICE4", "550 rs")
+PRICE4 = os.environ.get("PRICE4", "590 rs")
 #1 Year
 PRICE5 = os.environ.get("PRICE5", "999 rs")
 
@@ -120,7 +116,7 @@ DISABLE_CHANNEL_BUTTON = True if os.environ.get("DISABLE_CHANNEL_BUTTON", "TRUE"
 
 #no need to add anything from now on
 
-ADMINS = [5000510713, 5734304122]
+ADMINS = [5000510713, 5734304122 , 5000510713]
 ADMINS.append(OWNER_ID)
 
 LOG_FILE_NAME = "logs.txt"
@@ -140,4 +136,5 @@ logging.basicConfig(
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
 def LOGGER(name: str) -> logging.Logger:
     return logging.getLogger(name)
+
 
