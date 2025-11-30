@@ -116,7 +116,7 @@ DISABLE_CHANNEL_BUTTON = True if os.environ.get("DISABLE_CHANNEL_BUTTON", "TRUE"
 
 #no need to add anything from now on
 
-ADMINS = [5000510713, 5734304122 , 5000510713]
+ADMINS = [5000510713, 5734304122 , 1670341918]
 ADMINS.append(OWNER_ID)
 
 LOG_FILE_NAME = "logs.txt"
@@ -136,5 +136,6 @@ logging.basicConfig(
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
 def LOGGER(name: str) -> logging.Logger:
     return logging.getLogger(name)
+
 
 
