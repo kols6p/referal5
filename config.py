@@ -53,7 +53,7 @@ START_MSG = os.environ.get("START_MESSAGE", "Hello {first}\n\nI can store privat
 #your telegram tag without @
 OWNER_TAG = os.environ.get("OWNER_TAG", "Elvish_6")
 #Time in seconds for message delete
-TIME = int(os.environ.get("TIME", "600"))
+TIME = int(os.environ.get("TIME", "1500"))
 
 
 # add premium logs channel id
@@ -136,6 +136,7 @@ logging.basicConfig(
 logging.getLogger("pyrogram").setLevel(logging.WARNING)
 def LOGGER(name: str) -> logging.Logger:
     return logging.getLogger(name)
+
 
 
 
